@@ -145,6 +145,17 @@ npm run build
 
 ---
 
+## Deploy on Netlify
+
+1. Push this repo to GitHub (or connect the repo in the Netlify UI).
+2. **New site from Git** → pick the repo → Netlify should detect **Next.js** and use `npm run build` (see [`netlify.toml`](netlify.toml); Node **20** is pinned for builds).
+3. **Site settings → Environment variables** (production + preview): set at least **`NEXT_PUBLIC_MAPTILER_KEY`** from [MapTiler](https://cloud.maptiler.com/). Supabase vars stay optional until you wire auth/persistence.
+4. Deploy. The map falls back to a dimmed OSM raster if MapTiler is unset (not ideal for production traffic).
+
+CLI (optional): `npx netlify login`, then `npx netlify link --git-remote-url https://github.com/jfishbowl-01/WalkWithMe.git`, and `npx netlify deploy --prod` when you want a manual production deploy.
+
+---
+
 ## Agent handoff (Claude Code / next maintainer)
 
 ### Solid foundations
