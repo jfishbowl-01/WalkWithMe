@@ -2,14 +2,8 @@
 
 import { Navigation, Timer, Waypoints } from "lucide-react";
 import { Card, CardTitle } from "@/components/ui/card";
+import { formatDurationClock } from "@/lib/geo/formatters";
 import type { ActiveWalkSnapshot } from "@/types/walk";
-
-function formatDuration(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
 
 function formatDistance(distanceMeters: number) {
   if (distanceMeters >= 1000) {
@@ -37,7 +31,9 @@ export function ActiveWalkPanel({ snapshot }: ActiveWalkPanelProps) {
         <div className="rounded-xl border border-white/8 bg-white/6 p-3">
           <Timer className="h-4 w-4 text-completed" />
           <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/45">Time</p>
-          <p className="mt-1 text-base font-semibold">{formatDuration(snapshot.elapsedSeconds)}</p>
+          <p className="mt-1 text-base font-semibold">
+            {formatDurationClock(snapshot.elapsedSeconds)}
+          </p>
         </div>
         <div className="rounded-xl border border-white/8 bg-white/6 p-3">
           <Navigation className="h-4 w-4 text-active-route" />

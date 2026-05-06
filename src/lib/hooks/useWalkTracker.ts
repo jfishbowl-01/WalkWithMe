@@ -226,53 +226,69 @@ export function useWalkTracker(options?: UseWalkTrackerOptions) {
     return true;
   }, [startTimer, stop]);
 
-  const startDemoWalk = useCallback(() => {
-    const demoWalk = options?.demoWalk;
+  const runAnimatedDemo = useCallback(
+    (demoWalk: DemoWalkDefinition) => {
+      stop();
+      const startedAt = new Date().toISOString();
 
-    if (!demoWalk) {
-      return false;
-    }
+      setSnapshot({
+        status: "tracking",
+        startedAt,
+        elapsedSeconds: 0,
+        distanceMeters: 0,
+        points: [],
+      });
 
-    stop();
-    const startedAt = new Date().toISOString();
+      startTimer(startedAt);
 
-    setSnapshot({
-      status: "tracking",
-      startedAt,
-      elapsedSeconds: 0,
-      distanceMeters: 0,
-      points: [],
-    });
+      let index = 0;
 
-    startTimer(startedAt);
+      const scheduleNext = () => {
+        if (index >= demoWalk.points.length) {
+          return;
+        }
 
-    let index = 0;
+        const nextPoint = {
+          ...demoWalk.points[index],
+          timestamp: new Date().toISOString(),
+          sequenceIndex: index,
+        };
 
-    const scheduleNext = () => {
-      if (index >= demoWalk.points.length) {
-        return;
-      }
+        pushPoint(nextPoint);
+        index += 1;
 
-      const nextPoint = {
-        ...demoWalk.points[index],
-        timestamp: new Date().toISOString(),
-        sequenceIndex: index,
+        if (index < demoWalk.points.length) {
+          demoTimeoutRef.current = window.setTimeout(
+            scheduleNext,
+            demoWalk.pointIntervalMs,
+          );
+        }
       };
 
-      pushPoint(nextPoint);
-      index += 1;
+      scheduleNext();
+    },
+    [pushPoint, startTimer, stop],
+  );
 
-      if (index < demoWalk.points.length) {
-        demoTimeoutRef.current = window.setTimeout(
-          scheduleNext,
-          demoWalk.pointIntervalMs,
-        );
-      }
-    };
-
-    scheduleNext();
+  const startDemoWalk = useCallback(() => {
+    const demoWalk = options?.demoWalk;
+    if (!demoWalk || demoWalk.points.length < 2) {
+      return false;
+    }
+    runAnimatedDemo(demoWalk);
     return true;
-  }, [options?.demoWalk, pushPoint, startTimer, stop]);
+  }, [options?.demoWalk, runAnimatedDemo]);
+
+  const startDemoWalkFromDefinition = useCallback(
+    (demoWalk: DemoWalkDefinition) => {
+      if (!demoWalk.points.length || demoWalk.points.length < 2) {
+        return false;
+      }
+      runAnimatedDemo(demoWalk);
+      return true;
+    },
+    [runAnimatedDemo],
+  );
 
   const finishWalk = useCallback(() => {
     stop();
@@ -296,10 +312,20 @@ export function useWalkTracker(options?: UseWalkTrackerOptions) {
       canFinish,
       startWalk,
       startDemoWalk,
+      startDemoWalkFromDefinition,
       finishWalk,
       stop,
     }),
-    [canFinish, finishWalk, isTracking, snapshot, startDemoWalk, startWalk, stop],
+    [
+      canFinish,
+      finishWalk,
+      isTracking,
+      snapshot,
+      startDemoWalk,
+      startDemoWalkFromDefinition,
+      startWalk,
+      stop,
+    ],
   );
 }
 

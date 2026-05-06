@@ -6,7 +6,7 @@ import { Camera, PenSquare, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { RoutePreviewMap } from "@/components/walk/route-preview-map";
-import { formatDurationMinutes, formatMeters } from "@/lib/geo/formatters";
+import { formatDurationHuman, formatMeters } from "@/lib/geo/formatters";
 import { useUnitPreference } from "@/lib/hooks/useUnitPreference";
 import type { WalkRecord } from "@/types/walk";
 
@@ -84,7 +84,7 @@ export function WalkSummary({
           <div className="rounded-3xl border border-white/8 bg-white/6 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-white/45">Duration</p>
             <p className="mt-2 text-2xl font-semibold text-white">
-              {formatDurationMinutes(walk.durationSeconds)}
+              {formatDurationHuman(walk.durationSeconds)}
             </p>
           </div>
           <div className="rounded-3xl border border-white/8 bg-white/6 p-4">

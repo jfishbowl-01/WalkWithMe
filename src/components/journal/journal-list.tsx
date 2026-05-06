@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Camera } from "lucide-react";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { WalkRouteThumbnail } from "@/components/walk/walk-route-thumbnail";
-import { formatDurationMinutes, formatMeters } from "@/lib/geo/formatters";
+import { formatDurationHuman, formatMeters } from "@/lib/geo/formatters";
 import { useUnitPreference } from "@/lib/hooks/useUnitPreference";
 import type { WalkRecord } from "@/types/walk";
 
@@ -44,7 +44,7 @@ export function JournalList({ walks }: JournalListProps) {
                     {formatMeters(walk.distanceMeters, units)}
                   </span>
                   <span className="rounded-full border border-white/8 bg-white/6 px-3 py-1">
-                    {formatDurationMinutes(walk.durationSeconds)}
+                    {formatDurationHuman(walk.durationSeconds)}
                   </span>
                   <span className="rounded-full border border-white/8 bg-white/6 px-3 py-1">
                     {walk.newlyCompletedSegmentIds.length} new streets

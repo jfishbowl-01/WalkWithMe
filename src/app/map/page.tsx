@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Flame, Sparkles, Trophy } from "lucide-react";
@@ -12,6 +12,7 @@ import { StartWalkButton } from "@/components/walk/start-walk-button";
 import { buildLineStringFromPoints } from "@/lib/geo/buildLineStringFromPoints";
 import { calculateCompletedSegments } from "@/lib/geo/calculateCompletedSegments";
 import { DEMO_WALKS } from "@/lib/mock-data/demo-walks";
+import { generateProceduralDemoWalk } from "@/lib/mock-data/procedural-demo-walk";
 import { useLocalSession } from "@/lib/hooks/useLocalSession";
 import { useWalkTracker } from "@/lib/hooks/useWalkTracker";
 import { CAMBRIDGE_SEGMENTS } from "@/lib/mock-data/cambridge-segments";
@@ -77,18 +78,38 @@ export default function MapPage() {
     return points[points.length - 1];
   }, [tracker.snapshot.points]);
 
+  const refreshMapStatsFromStorage = useCallback(() => {
+    setCompletedSegments(completionRepository.getAll());
+    setProgress(buildProgressStats());
+  }, []);
+
   useEffect(() => {
     if (!isHydrated) {
       return;
     }
 
-    // State is initialized via useState callbacks above,
-    // so we don't need to set it here (avoids cascading renders)
-
     if (!session.isAuthenticated || !session.user) {
       router.replace("/login");
     }
   }, [isHydrated, router, session.isAuthenticated, session.user]);
+
+  useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+    const onFocus = () => refreshMapStatsFromStorage();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshMapStatsFromStorage();
+      }
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isHydrated, refreshMapStatsFromStorage]);
 
   if (!isHydrated || !session.isAuthenticated || !session.user) {
     return null;
@@ -97,8 +118,7 @@ export default function MapPage() {
   const user = session.user;
   const streakData = calculateStreaks(walkRepository.getAll());
 
-  const persistWalk = (draft: DraftWalkSummary) => {
-    const walkId = createWalkId();
+  const persistWalk = (draft: DraftWalkSummary, walkId: string) => {
     const walkRecord: WalkRecord = {
       id: walkId,
       userId: user.id,
@@ -151,16 +171,19 @@ export default function MapPage() {
     setProgress(buildProgressStats());
     setRecentlyCompletedIds(completionResult.newlyCompletedSegmentIds);
 
-    const saved = persistWalk({
-      startedAt: snapshot.startedAt,
-      endedAt: new Date().toISOString(),
-      durationSeconds: snapshot.elapsedSeconds,
-      distanceMeters: snapshot.distanceMeters,
-      route,
-      points: snapshot.points,
-      newlyCompletedSegmentIds: completionResult.newlyCompletedSegmentIds,
-      matchDetails: completionResult.matchDetails,
-    });
+    const saved = persistWalk(
+      {
+        startedAt: snapshot.startedAt,
+        endedAt: new Date().toISOString(),
+        durationSeconds: snapshot.elapsedSeconds,
+        distanceMeters: snapshot.distanceMeters,
+        route,
+        points: snapshot.points,
+        newlyCompletedSegmentIds: completionResult.newlyCompletedSegmentIds,
+        matchDetails: completionResult.matchDetails,
+      },
+      walkId,
+    );
 
     setProgress(buildProgressStats());
     router.push(`/walk/${saved.id}`);
@@ -247,6 +270,29 @@ export default function MapPage() {
                 onFinish={handleFinishWalk}
                 onDemoWalk={tracker.startDemoWalk}
                 showDemoWalk={process.env.NODE_ENV !== "production"}
+                demoOptions={
+                  process.env.NODE_ENV !== "production"
+                    ? [
+                        {
+                          label: DEMO_WALKS[1]?.title ?? "Demo 2",
+                          onClick: () =>
+                            tracker.startDemoWalkFromDefinition(DEMO_WALKS[1]!),
+                        },
+                        {
+                          label: DEMO_WALKS[2]?.title ?? "Demo 3",
+                          onClick: () =>
+                            tracker.startDemoWalkFromDefinition(DEMO_WALKS[2]!),
+                        },
+                        {
+                          label: "Random route",
+                          onClick: () =>
+                            tracker.startDemoWalkFromDefinition(
+                              generateProceduralDemoWalk(Date.now()),
+                            ),
+                        },
+                      ]
+                    : undefined
+                }
               />
               <p className="max-w-md text-xs leading-relaxed text-white/50">
                 {GPS_HINT_SHORT}

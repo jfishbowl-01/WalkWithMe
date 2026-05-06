@@ -6,6 +6,7 @@ import { AppShell } from "@/components/shell/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import {
+  completionRepository,
   privacyRepository,
   prototypeRepository,
   sessionRepository,
@@ -234,6 +235,30 @@ export default function SettingsClient() {
                 </dd>
               </div>
             </dl>
+            <p className="mt-4 text-xs leading-relaxed text-white/50">
+              Load sample completions to preview the progress map and ring without walking.
+              Clear only completions to reset that preview.
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <Button
+                variant="secondary"
+                className="w-full sm:flex-1"
+                onClick={() => {
+                  completionRepository.seedSampleForPreview("preview-seed-walk", 8);
+                }}
+              >
+                Load sample completions
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full sm:flex-1"
+                onClick={() => {
+                  completionRepository.clearAll();
+                }}
+              >
+                Clear completions only
+              </Button>
+            </div>
           </Card>
         ) : null}
       </div>

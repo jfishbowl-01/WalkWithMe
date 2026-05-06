@@ -136,6 +136,30 @@ export const completionRepository = {
       };
     }).completedSegments;
   },
+
+  clearAll() {
+    return updateLocalAppState((state) => ({
+      ...state,
+      completedSegments: [],
+      achievements: withAchievements([], state.walks, state.achievements),
+    })).completedSegments;
+  },
+
+  /** Dev/preview: mark the first N sample segments complete (fake walk id). */
+  seedSampleForPreview(fakeWalkId: string, segmentCount: number) {
+    const slice = CAMBRIDGE_SEGMENTS.features.slice(
+      0,
+      Math.max(0, Math.min(segmentCount, CAMBRIDGE_SEGMENTS.features.length)),
+    );
+    const now = new Date().toISOString();
+    const records: CompletedSegmentRecord[] = slice.map((f) => ({
+      streetSegmentId: f.properties.id,
+      firstCompletedWalkId: fakeWalkId,
+      completedAt: now,
+      completionRatio: 0.85,
+    }));
+    return completionRepository.saveMany(records);
+  },
 };
 
 export const privacyRepository = {
