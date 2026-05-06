@@ -1,36 +1,180 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WalkWithMe
 
-## Getting Started
+Personal walking app for **Cambridge, Massachusetts**: a **street-completion game** and private atlas — not primarily a fitness tracker.
 
-First, run the development server:
+**Flow:** Start walk → record GPS (or demo route) → finish → save walk → match route to mock street geometry → light up the map → journal + progress.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This repo is a **local-first MVP** with **Supabase/PostGIS migrations** ready for the next phase (real auth, server persistence, OSM-backed segments).
+
+---
+
+## Tech stack
+
+| Layer | Choice |
+|--------|--------|
+| Framework | Next.js **16** (App Router), React **19**, TypeScript |
+| Styling | Tailwind CSS **4** |
+| Map | **MapLibre GL** (`map-view.tsx`; dynamic `ssr: false` on `/map`) |
+| Geo | **Turf.js** (completion heuristics) |
+| Storage | **`localStorage`** via versioned `local-store` + **repositories** |
+| Backend (scaffold) | **Supabase** client/server helpers; optional env vars |
+
+Optional dependency **react-map-gl** is installed; the primary map implementation is imperative MapLibre in `map-view.tsx`.
+
+---
+
+## Routes
+
+| Path | Purpose |
+|------|---------|
+| `/` | Redirects to `/login` |
+| `/login` | Mock sign-in |
+| `/map` | Full-bleed map, walk tracking, bottom tabs + profile bubble |
+| `/journal` | Saved walks list |
+| `/walk/[id]` | Walk summary + notes + local photo thumbnails (base64 in storage) |
+| `/progress` | Stats, records, streaks, completion map (**client-only dashboard**; see below) |
+| `/settings` | Map style, units, privacy, account; developer block only in `NODE_ENV !== 'production'` |
+
+---
+
+## UI / navigation (current)
+
+- **Bottom tab bar** — shared component `AppBottomTabs` (`fixed` on shell pages, `absolute` on map). Nav config: `src/lib/config/nav.ts` (`MAIN_NAV_ITEMS`).
+- **Profile** — initials bubble → `/settings` (`ProfileBubble`). Map page has the same bubble (safe-area aware).
+- **App shell** — `AppShell`: title + subtitle + profile; main content; bottom padding for tabs.
+
+---
+
+## Data & architecture
+
+### Persistence (today)
+
+Single JSON blob in **`localStorage`** key `walkwithme.app-state` (`LOCAL_APP_STATE_VERSION`). Holds:
+
+- session (mock user)
+- walks
+- completed segment records
+- privacy settings
+- placeholder achievements
+
+**Read/write** goes through **`src/lib/storage/repositories.ts`** (`walkRepository`, `completionRepository`, `sessionRepository`, etc.). Prefer extending repositories rather than calling `localStorage` from random components.
+
+### Completion vs “walks logged”
+
+- **Walks** = every saved trip (journal).
+- **Completed streets / segments** = geometry matched by `calculateCompletedSegments.ts` (threshold ~75% of segment length). You can have many walks but **low completion** if routes don’t overlap the mock network.
+
+### Supabase (future)
+
+SQL under `supabase/migrations/`. Helpers return `null` when `NEXT_PUBLIC_SUPABASE_*` are unset. Env validation: `src/lib/config/env.ts`.
+
+---
+
+## SSR, hydration, and Progress
+
+On the server, `readLocalAppState()` has **no `window`** → **empty defaults**. Client components that initialize state from storage in `useState(() => …)` can **hydrate with zeros** and look “disconnected” from real data.
+
+**Mitigation:** `src/app/progress/page.tsx` loads `ProgressDashboard` with **`next/dynamic(..., { ssr: false })`** so stats always read real storage in the browser. Apply the same pattern for any new screen that must show storage-backed numbers on first paint.
+
+---
+
+## Project layout
+
+```text
+src/app/           # App Router pages
+src/components/
+  shell/           # AppShell, AppBottomTabs, ProfileBubble
+  map/             # map-view, map-controls-card
+  walk/            # tracking, summary, thumbnails
+  journal/
+  progress/        # progress-dashboard (client-only entry), cards, heatmap
+  ui/              # Button, Card
+src/lib/
+  auth/            # mock session helpers
+  config/          # env, nav
+  geo/             # completion, distance, formatters, segment-status
+  hooks/           # useWalkTracker, useLocalSession, useUnitPreference
+  map/             # style, layer source ids
+  mock-data/       # cambridge-segments, demo-walks
+  storage/         # local-store, repositories, progress-calculations
+  supabase/
+src/types/
+supabase/migrations/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Removed / unused:** old standalone `street-segment-layer` / `current-walk-layer` / `progress-card` were not imported anywhere and have been deleted to avoid drift.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment variables
 
-## Learn More
+Copy **`.env.local.example`** → `.env.local`.
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Role |
+|----------|------|
+| `NEXT_PUBLIC_MAPTILER_KEY` | MapTiler styles (recommended) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Optional until wired |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional until wired |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Without MapTiler, the app uses a dimmed **OSM raster** fallback (rate limits at high zoom).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Map styles
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+User-selectable presets in **Settings** (`src/lib/map/map-style.ts`). Preference: `localStorage` key `mapStylePreset`. Map listens for `mapStyleChange` custom event.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## GPS & completion (MVP limits)
+
+- **Foreground** geolocation only; laptop accuracy can be poor vs phone.
+- Completion is **proximity/heuristic**, not production map-matching; parallel streets can false-positive.
+- **Demo walk** is available when `NODE_ENV !== "production"`.
+
+---
+
+## Commands
+
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+```
+
+---
+
+## Agent handoff (Claude Code / next maintainer)
+
+### Solid foundations
+
+- Clear separation: **geo** / **storage** / **UI** / **types**.
+- **Repositories** as the persistence seam for a future API.
+- **Units** and **map style** centralized.
+- **Bottom nav** centralized in `nav.ts`.
+
+### Likely big decisions next
+
+1. **Supabase Auth** — replace mock session; middleware or layout guards; profile row trigger already in migrations.
+2. **Sync model** — migrate walks + `completed_segments` off `localStorage`; conflict/version strategy if keeping offline.
+3. **Segments** — replace `cambridge-segments.ts` with `street_segments` queries + bbox; keep completion API stable if possible.
+4. **Completion location** — move Turf logic to **PostGIS** (or edge function) for consistent results; keep `walk_segment_matches` for debugging.
+5. **Photos** — today: **base64 in local JSON** (bad for size). Move to **Supabase Storage** + URLs on `walk_photos`.
+6. **Dead dependency audit** — confirm whether **react-map-gl** should stay or be removed if unused.
+
+### Docs entry points
+
+- **README.md** (this file) — product + architecture + env.
+- **AGENTS.md** — Next 16 note + conventions + SSR caveat.
+- **CLAUDE.md** — short pointer to README + AGENTS.
+
+### Product backlog (short)
+
+Wire auth → persist walks → PostGIS completion → real segment import → photo storage → privacy-safe export. Longer wishlist: Strava/Health import, native shell if background GPS is required.
+
+---
+
+## License / usage
+
+Structured as a **personal prototype** for WalkWithMe; adjust license as needed before public distribution.
