@@ -185,10 +185,14 @@ export function WalkSummary({
 
         <div className="mt-4 rounded-3xl border border-white/8 bg-white/6 p-4">
           <p className="text-xs uppercase tracking-[0.2em] text-white/45">
-            Cambridge completion
+            Sample map progress
           </p>
           <p className="mt-2 text-2xl font-semibold text-white">
             {completionPercentage.toFixed(1)}%
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-white/50">
+            Share of the Cambridge-area preview streets. Low here doesn’t mean your walk
+            didn’t save.
           </p>
         </div>
 

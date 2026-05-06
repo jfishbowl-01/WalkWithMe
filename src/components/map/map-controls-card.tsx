@@ -1,4 +1,5 @@
 import { Card, CardTitle } from "@/components/ui/card";
+import { SAMPLE_MAP_MAP_CARD } from "@/lib/config/user-facing-copy";
 
 interface MapControlsCardProps {
   completionPercentage: number;
@@ -16,7 +17,10 @@ export function MapControlsCard({
           <p className="text-xs uppercase tracking-[0.35em] text-white/45">
             WalkWithMe
           </p>
-          <CardTitle className="mt-2 text-lg">Cambridge atlas</CardTitle>
+          <CardTitle className="mt-2 text-lg">Your walk</CardTitle>
+          <p className="mt-2 max-w-[240px] text-xs leading-relaxed text-white/55">
+            {SAMPLE_MAP_MAP_CARD}
+          </p>
         </div>
 
         <div
@@ -42,8 +46,8 @@ export function MapControlsCard({
           <p className="mt-1 text-lg font-semibold">{walksLogged}</p>
         </div>
         <div className="rounded-xl border border-white/8 bg-white/6 p-3">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/45">Focus</p>
-          <p className="mt-1 text-sm font-medium text-white/80">Central / Harvard / MIT</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-white/45">Sample area</p>
+          <p className="mt-1 text-sm font-medium text-white/80">Cambridge, MA preview</p>
         </div>
       </div>
     </Card>

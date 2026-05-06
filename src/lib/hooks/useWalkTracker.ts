@@ -1,12 +1,67 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { calculateDistance } from "@/lib/geo/calculateDistance";
+import {
+  calculateDistance,
+  calculateDistanceBetweenPoints,
+} from "@/lib/geo/calculateDistance";
 import type { WalkPoint } from "@/types/geo";
 import type { ActiveWalkSnapshot, DemoWalkDefinition } from "@/types/walk";
 
+/** Reject fixes worse than this after we already have a point (meters). */
+const MAX_ACCEPTABLE_ACCURACY_M = 85;
+/** Implied speed above this is treated as a GPS jump (m/s). ~6 m/s ≈ 13.4 mph. */
+const MAX_IMPLIED_SPEED_MPS = 5.5;
+/** Ignore nearly-duplicate readings (noise while stationary). */
+const MIN_POINT_INTERVAL_S = 0.45;
+const MIN_POINT_DISPLACEMENT_M = 2.5;
+
 interface UseWalkTrackerOptions {
   demoWalk?: DemoWalkDefinition;
+}
+
+function mergeNextPoint(points: WalkPoint[], candidate: WalkPoint): WalkPoint[] | null {
+  if (points.length === 0) {
+    return [candidate];
+  }
+
+  const last = points[points.length - 1];
+  const dt =
+    (Date.parse(candidate.timestamp) - Date.parse(last.timestamp)) / 1000;
+  if (dt <= 0) {
+    return null;
+  }
+
+  if (
+    candidate.accuracyMeters != null &&
+    candidate.accuracyMeters > MAX_ACCEPTABLE_ACCURACY_M &&
+    points.length >= 1
+  ) {
+    return null;
+  }
+
+  const dist = calculateDistanceBetweenPoints(last, candidate);
+  const impliedSpeed = dist / Math.max(dt, 0.25);
+
+  if (impliedSpeed > MAX_IMPLIED_SPEED_MPS) {
+    const lastAcc = last.accuracyMeters;
+    const newAcc = candidate.accuracyMeters;
+    if (
+      lastAcc != null &&
+      newAcc != null &&
+      newAcc < lastAcc * 0.85 &&
+      newAcc <= 40
+    ) {
+      return [...points.slice(0, -1), candidate];
+    }
+    return null;
+  }
+
+  if (dt < MIN_POINT_INTERVAL_S && dist < MIN_POINT_DISPLACEMENT_M) {
+    return null;
+  }
+
+  return [...points, candidate];
 }
 
 function createPoint(
@@ -133,14 +188,21 @@ export function useWalkTracker(options?: UseWalkTrackerOptions) {
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         setSnapshot((current) => {
-          const point = toCoordinatePoint(position.coords, current.points.length);
-          const points = [...current.points, point];
+          const nextIndex = current.points.length;
+          const candidate = toCoordinatePoint(position.coords, nextIndex);
+          const merged = mergeNextPoint(current.points, candidate);
+
+          if (merged === null) {
+            return current.status === "requesting"
+              ? { ...current, status: "tracking" as const }
+              : current;
+          }
 
           return {
             ...current,
             status: "tracking",
-            points,
-            distanceMeters: calculateDistance(points),
+            points: merged,
+            distanceMeters: calculateDistance(merged),
             errorMessage: undefined,
           };
         });
@@ -155,8 +217,9 @@ export function useWalkTracker(options?: UseWalkTrackerOptions) {
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 3000,
-        timeout: 10000,
+        // Stale cached positions often cause a big first jump when the real fix arrives.
+        maximumAge: 0,
+        timeout: 15000,
       },
     );
 

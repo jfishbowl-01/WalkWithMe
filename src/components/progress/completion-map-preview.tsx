@@ -11,10 +11,13 @@ import type { CompletedSegmentRecord } from "@/types/segments";
 
 interface CompletionMapPreviewProps {
   completedSegments: CompletedSegmentRecord[];
+  /** When > 0 but completedSegments is empty, show “mock Cambridge” guidance. */
+  walksLogged: number;
 }
 
 export function CompletionMapPreview({
   completedSegments,
+  walksLogged,
 }: CompletionMapPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -95,9 +98,22 @@ export function CompletionMapPreview({
     <div className="relative h-full w-full overflow-hidden rounded-2xl border border-white/8 bg-white/6">
       <div ref={containerRef} className="h-full w-full" />
       {completedSegments.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <p className="text-sm text-white/60">
-            Complete your first walk to see the map
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+          <p className="max-w-sm text-center text-sm leading-relaxed text-white/65">
+            {walksLogged === 0 ? (
+              "Finish a walk to see completed streets light up on this preview map."
+            ) : (
+              <>
+                Your walks are saved, but{" "}
+                <span className="text-white/85">none of them crossed</span> the preview
+                streets near Cambridge, MA yet. That often happens at home on a laptop.
+                For a fair test, try{" "}
+                <strong className="font-medium text-white/90">a phone outside</strong>
+                {" "}in that area, or{" "}
+                <strong className="font-medium text-white/90">Demo Walk</strong> when the
+                app is running in development mode.
+              </>
+            )}
           </p>
         </div>
       )}

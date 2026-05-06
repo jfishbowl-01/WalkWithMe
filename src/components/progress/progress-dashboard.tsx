@@ -48,15 +48,17 @@ export function ProgressDashboard() {
 
   return (
     <AppShell
-      title="Progress dashboard"
-      subtitle="Cambridge completion, records, and streaks."
+      title="Progress"
+      subtitle="How you’re doing on the sample street map, your records, and streaks."
       activePath="/progress"
     >
       <div className="grid gap-4 lg:grid-cols-[0.6fr_1fr]">
         <Card className="rounded-[2rem] p-6">
-          <CardTitle>Cambridge Completion</CardTitle>
+          <CardTitle>Sample map completion</CardTitle>
           <CardDescription className="mt-2">
-            Your progress exploring Cambridge streets and paths.
+            This ring is your share of the preview street network near Cambridge, MA—not
+            your whole region. Saved walks can still show 0% here if the path doesn’t
+            overlap the preview.
           </CardDescription>
 
           <div className="mt-6 flex justify-center">
@@ -87,13 +89,17 @@ export function ProgressDashboard() {
         </Card>
 
         <Card className="rounded-[2rem] p-6">
-          <CardTitle>Completion Map</CardTitle>
+          <CardTitle>Completion map</CardTitle>
           <CardDescription className="mt-2">
-            Visual overview of completed streets in Cambridge.
+            Lines light up for streets you’ve completed on the preview map (same area as
+            above).
           </CardDescription>
 
           <div className="mt-6 h-[280px]">
-            <CompletionMapPreview completedSegments={completedSegments} />
+            <CompletionMapPreview
+              completedSegments={completedSegments}
+              walksLogged={walks.length}
+            />
           </div>
         </Card>
       </div>

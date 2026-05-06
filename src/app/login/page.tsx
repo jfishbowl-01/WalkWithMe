@@ -27,11 +27,13 @@ export default function LoginPage() {
               WalkWithMe
             </p>
             <h1 className="mt-4 max-w-xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              A personal walking atlas for Cambridge.
+              Turn walks into a light-up street map game.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
-              Track real walks, complete street and path segments like a map game,
-              and build a beautiful archive of where you have explored.
+              Record a path, save it, and see how much of our{" "}
+              <strong className="font-medium text-white/88">sample</strong> Cambridge-area
+              map you’ve covered. Your journal keeps every walk—even when the “percent
+              complete” number stays low.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -44,9 +46,9 @@ export default function LoginPage() {
               </div>
               <div className="rounded-3xl border border-white/8 bg-white/6 p-4">
                 <MapPinned className="h-5 w-5 text-active-route" />
-                <p className="mt-3 font-medium text-white">Beautiful Cambridge map</p>
+                <p className="mt-3 font-medium text-white">Sample map area</p>
                 <p className="mt-1 text-sm text-white/60">
-                  Mock Cambridge geometry now, Supabase/PostGIS-ready later.
+                  Preview streets near Cambridge, MA today—expandable to more places later.
                 </p>
               </div>
               <div className="rounded-3xl border border-white/8 bg-white/6 p-4">
@@ -60,12 +62,12 @@ export default function LoginPage() {
           </Card>
 
           <Card className="rounded-[2rem] p-8">
-            <CardTitle>Local-first prototype access</CardTitle>
+            <CardTitle>Try the preview</CardTitle>
             <CardDescription className="mt-2">
-              This milestone uses a mock sign-in and stores walks only in{" "}
-              <strong className="font-medium text-white/85">this browser</strong>.
-              Clearing site data or using another device means your walks are not
-              here—cloud sync comes with a future Supabase-backed release.
+              Sign-in is a simple local placeholder. Everything you save lives in{" "}
+              <strong className="font-medium text-white/85">this browser on this device</strong>
+              . Clearing website data or switching devices means your walks won’t appear
+              until we add online backup.
             </CardDescription>
 
             <div className="mt-4 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4">
@@ -73,10 +75,13 @@ export default function LoginPage() {
               <ul className="mt-2 list-inside list-disc space-y-1 text-sm leading-relaxed text-amber-100/85">
                 <li>GPS works best on a phone outdoors; laptops can be inaccurate.</li>
                 <li>
-                  Completion % reflects how your route overlaps the{" "}
-                  <em>mock</em> Cambridge map—you can log walks with low completion.
+                  The big “percent complete” number only counts overlap with the{" "}
+                  <em>sample</em> Cambridge-area map—not your whole city.
                 </li>
-                <li>Tracking is foreground-only in the browser (no background GPS).</li>
+                <li>
+                  The app can’t follow you in the background; keep the screen on while
+                  walking.
+                </li>
               </ul>
             </div>
 
@@ -86,13 +91,13 @@ export default function LoginPage() {
               </p>
               <p className="mt-2 text-lg font-semibold text-white">
                 {!isHydrated
-                  ? "Loading local prototype…"
+                  ? "Loading…"
                   : session.isAuthenticated
-                    ? "Signed in locally"
-                    : "Mock auth required"}
+                    ? "You’re in"
+                    : "Tap below to continue"}
               </p>
               <p className="mt-1 text-sm text-white/60">
-                Supabase can be layered in later without changing the core UX.
+                Online accounts and sync are planned next.
               </p>
             </div>
 

@@ -1,5 +1,10 @@
 import type { WalkRecord } from "@/types/walk";
 
+/** Faster than ~7.8 km/h sustained is unlikely walking; higher values are usually GPS error. */
+const MAX_PLAUSIBLE_PACE_METERS_PER_MINUTE = 130;
+const MIN_WALK_DURATION_FOR_PACE_SECONDS = 30;
+const MIN_WALK_DISTANCE_FOR_PACE_METERS = 35;
+
 export interface PersonalRecords {
   longestWalk: {
     distance: number;
@@ -52,17 +57,25 @@ export function calculatePersonalRecords(walks: WalkRecord[]): PersonalRecords {
       : max
   );
 
-  // Fastest pace (m/min) - only walks with duration > 0
-  const walksWithDuration = walks.filter((w) => w.durationSeconds > 0);
-  const fastestPaceWalk =
-    walksWithDuration.length > 0
-      ? walksWithDuration.reduce((fastest, walk) => {
-          const pace = walk.distanceMeters / (walk.durationSeconds / 60);
-          const fastestPace =
-            fastest.distanceMeters / (fastest.durationSeconds / 60);
-          return pace > fastestPace ? walk : fastest;
-        })
+  const walksEligibleForPace = walks.filter(
+    (w) =>
+      w.durationSeconds >= MIN_WALK_DURATION_FOR_PACE_SECONDS &&
+      w.distanceMeters >= MIN_WALK_DISTANCE_FOR_PACE_METERS,
+  );
+  const withPace = walksEligibleForPace.map((walk) => ({
+    walk,
+    paceMetersPerMinute: walk.distanceMeters / (walk.durationSeconds / 60),
+  }));
+  const plausiblePace = withPace.filter(
+    (row) => row.paceMetersPerMinute <= MAX_PLAUSIBLE_PACE_METERS_PER_MINUTE,
+  );
+  const fastestPaceRow =
+    plausiblePace.length > 0
+      ? plausiblePace.reduce((best, row) =>
+          row.paceMetersPerMinute > best.paceMetersPerMinute ? row : best,
+        )
       : null;
+  const fastestPaceWalk = fastestPaceRow?.walk ?? null;
 
   // Busiest day (most distance in single calendar day)
   const walksByDay = walks.reduce(

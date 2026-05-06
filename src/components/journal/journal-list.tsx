@@ -20,8 +20,8 @@ export function JournalList({ walks }: JournalListProps) {
       <Card className="rounded-[2rem] p-6">
         <CardTitle>No walks logged yet</CardTitle>
         <CardDescription className="mt-2">
-          Start from the map screen, finish a walk, and your personal Cambridge
-          journal will appear here.
+          Go to the map, start and finish a walk—saved trips show up here. This list is
+          stored only in this browser for now.
         </CardDescription>
       </Card>
     );

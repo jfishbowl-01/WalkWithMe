@@ -12,6 +12,7 @@ import {
 } from "@/lib/storage/repositories";
 import { MAP_STYLE_PRESETS, type MapStylePreset } from "@/lib/map/map-style";
 import { getMapEnv } from "@/lib/config/env";
+import { DATA_STAYS_ON_DEVICE } from "@/lib/config/user-facing-copy";
 import { cn } from "@/lib/utils";
 import type { DistanceUnit } from "@/lib/geo/formatters";
 import type { PrivacySettings } from "@/types/progress";
@@ -201,7 +202,7 @@ export default function SettingsClient() {
 
         <Card className="rounded-[2rem] p-5 sm:p-6">
           <CardTitle>Account</CardTitle>
-          <CardDescription className="mt-1">Session and local data (prototype).</CardDescription>
+          <CardDescription className="mt-1">{DATA_STAYS_ON_DEVICE}</CardDescription>
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Button variant="secondary" className="w-full sm:flex-1" onClick={handleSignOut}>

@@ -15,7 +15,7 @@ export function PersonalRecordsCard({ records }: { records: PersonalRecords }) {
       <Card className="rounded-[2rem] p-6">
         <CardTitle>Personal Records</CardTitle>
         <CardDescription className="mt-2">
-          Complete your first walk to start tracking your achievements.
+          Finish and save a walk to see longest distance and other highlights here.
         </CardDescription>
       </Card>
     );
@@ -66,7 +66,8 @@ export function PersonalRecordsCard({ records }: { records: PersonalRecords }) {
     <Card className="rounded-[2rem] p-6">
       <CardTitle>Personal Records</CardTitle>
       <CardDescription className="mt-2">
-        Your best walking achievements in Cambridge.
+        Your best distances and streaks from saved walks. Street counts use the preview
+        map rules above.
       </CardDescription>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">

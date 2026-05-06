@@ -36,6 +36,7 @@ npm run build
 
 ## Conventions
 
+- **Tester-facing copy** — prefer short, plain language in [`src/lib/config/user-facing-copy.ts`](src/lib/config/user-facing-copy.ts) for concepts like “sample map” and device-only storage; wire into UI from there when it fits.
 - **Repositories** (`walkRepository`, `completionRepository`, etc.) are the abstraction over local state; future backend work should keep a similar surface area where possible.
 - **Types** live under `src/types/`.
 - **Nav items** — single source: `src/lib/config/nav.ts` (`MAIN_NAV_ITEMS`).

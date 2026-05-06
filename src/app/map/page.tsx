@@ -20,6 +20,7 @@ import {
   completionRepository,
   walkRepository,
 } from "@/lib/storage/repositories";
+import { GPS_HINT_SHORT } from "@/lib/config/user-facing-copy";
 import { calculateStreaks } from "@/lib/storage/progress-calculations";
 import type { DraftWalkSummary, WalkRecord } from "@/types/walk";
 
@@ -238,14 +239,19 @@ export default function MapPage() {
               </div>
             ) : null}
 
-            <StartWalkButton
-              isTracking={tracker.isTracking}
-              canFinish={tracker.canFinish}
-              onStart={handleStartWalk}
-              onFinish={handleFinishWalk}
-              onDemoWalk={tracker.startDemoWalk}
-              showDemoWalk={process.env.NODE_ENV !== "production"}
-            />
+            <div className="flex flex-col gap-2">
+              <StartWalkButton
+                isTracking={tracker.isTracking}
+                canFinish={tracker.canFinish}
+                onStart={handleStartWalk}
+                onFinish={handleFinishWalk}
+                onDemoWalk={tracker.startDemoWalk}
+                showDemoWalk={process.env.NODE_ENV !== "production"}
+              />
+              <p className="max-w-md text-xs leading-relaxed text-white/50">
+                {GPS_HINT_SHORT}
+              </p>
+            </div>
           </div>
         </div>
       </div>

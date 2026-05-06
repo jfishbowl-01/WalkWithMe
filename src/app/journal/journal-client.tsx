@@ -10,7 +10,7 @@ export default function JournalClient() {
   return (
     <AppShell
       title="Walk journal"
-      subtitle="Your saved walks and notes."
+      subtitle="Saved walks and notes (this device only, for now)."
       activePath="/journal"
     >
       <JournalList walks={walks} />
