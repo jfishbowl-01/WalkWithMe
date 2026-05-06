@@ -92,6 +92,10 @@ export function WalkSummary({
             <p className="mt-2 text-2xl font-semibold text-white">
               {walk.newlyCompletedSegmentIds.length}
             </p>
+            <p className="mt-1 text-xs leading-snug text-white/50">
+              Preview streets you finished for the first time on this trip—not the same as
+              your total sample-map % (see below).
+            </p>
           </div>
         </div>
 

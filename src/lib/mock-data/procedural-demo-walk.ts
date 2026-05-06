@@ -12,7 +12,8 @@ function mulberry32(seed: number) {
   };
 }
 
-const ENDPOINT_JOIN_M = 25;
+/** Tight graph: looser values create bogus graph edges and chord-like “random” routes. */
+const ENDPOINT_JOIN_M = 18;
 
 /**
  * Random walk on a graph of sample segments (endpoints within ~25 m).

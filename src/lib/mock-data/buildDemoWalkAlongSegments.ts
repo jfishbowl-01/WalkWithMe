@@ -5,6 +5,8 @@ import type { StreetSegmentFeature } from "@/types/geo";
 import type { WalkPoint } from "@/types/geo";
 
 const JOIN_TOLERANCE_M = 28;
+/** If consecutive path vertices are farther apart than this, the chain is invalid (no long chords). */
+const MAX_LEG_M = 55;
 
 function asLngLatTuple(c: Position): [number, number] {
   return [c[0], c[1]];
@@ -58,11 +60,54 @@ export function chainSegmentCoordinates(
     if (gap <= JOIN_TOLERANCE_M) {
       path.push(...oriented.slice(1));
     } else {
-      path.push(...oriented);
+      // Do not add a disjoint segment — that would draw a straight chord across the map.
+      break;
     }
   }
 
   return path;
+}
+
+/** Insert points every `stepMeters` along each leg so low-vertex mock polylines still bend like streets. */
+export function densifyPathCoordinates(
+  coordinates: [number, number][],
+  stepMeters: number,
+): [number, number][] {
+  if (coordinates.length < 2) {
+    return coordinates;
+  }
+
+  const out: [number, number][] = [];
+
+  for (let i = 0; i < coordinates.length - 1; i++) {
+    const seg = lineString([coordinates[i], coordinates[i + 1]]);
+    const segKm = length(seg, { units: "kilometers" });
+    const segM = segKm * 1000;
+    if (segM < 0.01) {
+      continue;
+    }
+    for (let dM = 0; dM < segM; dM += stepMeters) {
+      const p = along(seg, Math.min(dM / 1000, segKm), { units: "kilometers" });
+      out.push(p.geometry.coordinates as [number, number]);
+    }
+  }
+
+  out.push(coordinates[coordinates.length - 1]);
+
+  return out;
+}
+
+function maxLegMeters(coordinates: [number, number][]): number {
+  let max = 0;
+  for (let i = 1; i < coordinates.length; i++) {
+    max = Math.max(
+      max,
+      distance(point(coordinates[i - 1]), point(coordinates[i]), {
+        units: "meters",
+      }),
+    );
+  }
+  return max;
 }
 
 /**
@@ -128,11 +173,20 @@ export function samplePointsAlongPath(
   return samples;
 }
 
+const FALLBACK_CHAIN = ["mass-ave-central-1", "mass-ave-mit-1"] as const;
+
 export function buildWalkPointsFromSegmentChain(
   segmentIds: string[],
   options: { stepMeters: number; baseTimestampMs: number },
 ): WalkPoint[] {
-  const path = chainSegmentCoordinates(segmentIds);
+  let path = chainSegmentCoordinates(segmentIds);
+
+  if (path.length < 2 || maxLegMeters(path) > MAX_LEG_M) {
+    path = chainSegmentCoordinates([...FALLBACK_CHAIN]);
+  }
+
+  path = densifyPathCoordinates(path, 6);
+
   const raw = samplePointsAlongPath(path, options.stepMeters);
   return raw.map((p, sequenceIndex) => ({
     ...p,
