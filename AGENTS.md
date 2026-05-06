@@ -48,6 +48,8 @@ npm run build
 
 **Progress** avoids this by loading the dashboard with `next/dynamic(..., { ssr: false })` in `src/app/progress/page.tsx`.
 
+**Journal** (`journal/page.tsx` → `journal-client.tsx`), **walk detail** (`walk/[id]/page.tsx` → `walk-detail-client.tsx`), and **Settings** (`settings/page.tsx` → `settings-client.tsx`) use `dynamic(..., { ssr: false })` or deferred reads so `localStorage` is not empty on the server.
+
 When adding new screens that read storage on first paint, either:
 
 - use **`dynamic` + `ssr: false`** for the subtree that reads storage, or  

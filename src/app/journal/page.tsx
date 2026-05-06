@@ -1,21 +1,16 @@
 "use client";
 
-import { AppShell } from "@/components/shell/app-shell";
-import { JournalList } from "@/components/journal/journal-list";
-import { walkRepository } from "@/lib/storage/repositories";
+import dynamic from "next/dynamic";
+
+const JournalClient = dynamic(() => import("./journal-client"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex min-h-[40vh] items-center justify-center px-4 text-sm text-white/55">
+      Loading journal…
+    </div>
+  ),
+});
 
 export default function JournalPage() {
-  const walks = walkRepository.getAll();
-
-  return (
-    <AppShell
-      title="Walk journal"
-      subtitle="Your saved walks and notes."
-      activePath="/journal"
-    >
-      <JournalList walks={walks} />
-    </AppShell>
-  );
+  return <JournalClient />;
 }
-
-// Made with Bob

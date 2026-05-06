@@ -154,6 +154,13 @@ npm run build
 
 CLI (optional): `npx netlify login`, then `npx netlify link --git-remote-url https://github.com/jfishbowl-01/WalkWithMe.git`, and `npx netlify deploy --prod` when you want a manual production deploy.
 
+### Pausing automatic deploys
+
+Git-linked sites build on every push, which uses build minutes. Until you are ready for continuous deploys:
+
+- **Netlify UI:** Site configuration → **Build & deploy** → **Continuous deployment** → **Stop builds** (or disconnect the Git repository and deploy only via CLI drag-and-drop / `netlify deploy`).
+- **GitHub:** Disable the Netlify integration for this repo under repository **Settings → Integrations**, or make deploys **manual** in Netlify so previews do not run on every branch push.
+
 ---
 
 ## Agent handoff (Claude Code / next maintainer)

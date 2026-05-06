@@ -19,7 +19,14 @@ function getDefaultUnits(): DistanceUnit {
 }
 
 export function useUnitPreference() {
-  const [units, setUnits] = useState<DistanceUnit>(getDefaultUnits);
+  // Match SSR (no storage): sync real preference after mount in useEffect.
+  const [units, setUnits] = useState<DistanceUnit>("metric");
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setUnits(getDefaultUnits());
+    });
+  }, []);
 
   useEffect(() => {
     const handleUnitsChange = (event: Event) => {
