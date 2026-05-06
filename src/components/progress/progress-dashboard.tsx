@@ -68,14 +68,6 @@ export function ProgressDashboard() {
             />
           </div>
 
-          <p className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm leading-relaxed text-white/65">
-            <span className="font-medium text-white/85">How the percent works:</span> it is
-            (completed preview streets ÷ all preview streets) × 100. Example:{" "}
-            {progress.completedSegments} ÷ {progress.totalSegments} ≈{" "}
-            {progress.completionPercentage.toFixed(1)}%. “New streets” on a single walk is
-            only the streets first completed on that trip.
-          </p>
-
           <div className="mt-6 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-white/8 bg-white/6 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-white/45">

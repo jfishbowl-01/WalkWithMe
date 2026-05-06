@@ -212,7 +212,7 @@ export default function MapPage() {
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 5.5rem)" }}
         >
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div className="pointer-events-auto rounded-[1.5rem] border border-white/22 bg-[#050a12]/92 p-3 shadow-[0_10px_32px_rgba(0,0,0,0.45)] backdrop-blur-md">
+            <div className="pointer-events-auto">
               <MapControlsCard
                 completionPercentage={progress.completionPercentage}
                 walksLogged={progress.walksLogged}
@@ -224,45 +224,45 @@ export default function MapPage() {
             </div>
           </div>
 
-          <div className="pointer-events-auto flex max-w-md flex-col gap-3">
-            <div className="rounded-[1.5rem] border border-white/25 bg-[#050a12]/96 p-4 shadow-[0_12px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
-              {!tracker.isTracking ? (
-                <div className="mb-4 rounded-2xl border border-white/12 bg-white/6 p-4">
-                  <p className="text-xs uppercase tracking-[0.3em] text-white/55">
-                    Today at a glance
-                  </p>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    <div className="rounded-xl border border-white/10 bg-black/25 p-3">
-                      <Trophy className="h-4 w-4 text-completed" />
-                      <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/55">
-                        Complete
-                      </p>
-                      <p className="mt-1 text-base font-semibold text-white">
-                        {progress.completionPercentage.toFixed(0)}%
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-black/25 p-3">
-                      <Flame className="h-4 w-4 text-orange-300" />
-                      <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/55">
-                        Streak
-                      </p>
-                      <p className="mt-1 text-base font-semibold text-white">
-                        {streakData.currentStreak}d
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-black/25 p-3">
-                      <Sparkles className="h-4 w-4 text-active-route" />
-                      <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/55">
-                        Walks
-                      </p>
-                      <p className="mt-1 text-base font-semibold text-white">
-                        {progress.walksLogged}
-                      </p>
-                    </div>
+          <div className="pointer-events-auto flex flex-col gap-3 sm:max-w-md">
+            {!tracker.isTracking ? (
+              <div className="glass-panel rounded-[1.5rem] border p-4">
+                <p className="text-xs uppercase tracking-[0.3em] text-white/45">
+                  Today at a glance
+                </p>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="rounded-xl border border-white/8 bg-white/6 p-3">
+                    <Trophy className="h-4 w-4 text-completed" />
+                    <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/45">
+                      Complete
+                    </p>
+                    <p className="mt-1 text-base font-semibold text-white">
+                      {progress.completionPercentage.toFixed(0)}%
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-white/8 bg-white/6 p-3">
+                    <Flame className="h-4 w-4 text-orange-300" />
+                    <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/45">
+                      Streak
+                    </p>
+                    <p className="mt-1 text-base font-semibold text-white">
+                      {streakData.currentStreak}d
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-white/8 bg-white/6 p-3">
+                    <Sparkles className="h-4 w-4 text-active-route" />
+                    <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/45">
+                      Walks
+                    </p>
+                    <p className="mt-1 text-base font-semibold text-white">
+                      {progress.walksLogged}
+                    </p>
                   </div>
                 </div>
-              ) : null}
+              </div>
+            ) : null}
 
+            <div className="flex flex-col gap-2">
               <StartWalkButton
                 isTracking={tracker.isTracking}
                 canFinish={tracker.canFinish}
@@ -270,7 +270,6 @@ export default function MapPage() {
                 onFinish={handleFinishWalk}
                 onDemoWalk={tracker.startDemoWalk}
                 showDemoWalk={process.env.NODE_ENV !== "production"}
-                highContrastOnMap
                 demoOptions={
                   process.env.NODE_ENV !== "production"
                     ? [
@@ -295,7 +294,7 @@ export default function MapPage() {
                     : undefined
                 }
               />
-              <p className="mt-3 max-w-md text-xs leading-relaxed text-white/78">
+              <p className="max-w-md text-xs leading-relaxed text-white/50">
                 {GPS_HINT_SHORT}
               </p>
             </div>
